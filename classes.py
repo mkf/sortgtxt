@@ -142,4 +142,4 @@ class previouscomme(comment):
     pass
 
 with open("django.po") as f:
-    print(baza(f))
+    print(baza(f).wpisy)
