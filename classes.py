@@ -87,6 +87,7 @@ class baza(Object):
     def __init__(opened):
         self.wpisy = []
         callbackentries(opened,self.wpisy.append)
+        return self
 
 
 class wpis(Object):
@@ -98,6 +99,7 @@ class wpis(Object):
         for l in linie:
             if len(l) == 0:
                 raise PustaLinia
+        return self
 
 
 class pluralny(wpis):
@@ -137,3 +139,6 @@ class flagsline(comment):
 
 class previouscomme(comment):
     pass
+
+with f as open("django.po"):
+    print(baza(f))
