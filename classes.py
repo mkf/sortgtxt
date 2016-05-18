@@ -23,7 +23,7 @@ def jakbyco(linie):
                 a += quot.search(l)
                 msgstrlist.append(a)
             else:
-                raise UntiedQuote
+                raise UntiedQuote(l)
 
         elif l.startswith("msgid "):
             msgid = quot.search(l)
@@ -50,20 +50,43 @@ def jakbyco(linie):
             komenty.append(flagsline(l))
         elif l.startswith("#|"):
             komenty.append(previouscomme(l))
+        else:
+            raise UnknownToken(l)
+    if mamyliste:
+        return pluralny(linie,msgid,msgid_plural,msgstrlist,komenty)
+    elif len(msgid)==0:
+        return metadane(linie,msgstr,komenty)
+    else:
+        return wpis(linie,msgid,msgstr,komenty)
 
 
 class PustaLinia(Exception):
     pass
 
 
-class UntiedQuote(Exception):
+class UntiedQuote(UnknownToken):
     pass
 
+class UnknownToken(Exception):
+    pass
+
+def callbackentries(opened,callback):
+    bufor = []
+    for l in opened:
+        if len(l)==0:
+            if len(bufor)>0:
+                callback(tuple(bufor))
+                bufor = []
+        else:
+            bufor.append(l)
+    if len(bufor)>0:
+        callback(bufor)
 
 class baza(Object):
 
     def __init__(opened):
         self.wpisy = []
+        callbackentries(opened,self.wpisy.append)
 
 
 class wpis(Object):
