@@ -81,8 +81,9 @@ def callbackentries(opened, callback):
                 bufor = []
         else:
             bufor.append(l)
+            print(l)
     if len(bufor) > 0:
-        callback(bufor)
+        callback(tuple(bufor))
 
 
 class baza(object):
