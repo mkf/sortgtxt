@@ -16,6 +16,10 @@ def jakbyco(linie):
                 msgid_plural += quot.search(l)
             elif k == "msgstr":
                 msgstr += quot.search(l)
+            elif k == "msgstr[":
+                a = msgstrlist.pop()
+                a+=quot.search(l)
+                msgstrlist.append(a)
 
         elif l.startswith("msgid "):
             msgid = quot.search(l)
@@ -26,7 +30,12 @@ def jakbyco(linie):
         elif l.startswith("msgstr "):
             msgstr = quot.search(l)
             k = "msgstr"
-#        elif l.startswith(msgstr[
+        elif l.startswith("msgstr["):
+            if not mamyliste:
+                mamyliste = true
+                msgstrlist = []
+            msgstrlist.append(quot.search(l))
+            k = "msgstr["
 
 
 class PustaLinia(Exception):
