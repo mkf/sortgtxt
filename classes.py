@@ -53,40 +53,43 @@ def jakbyco(linie):
         else:
             raise UnknownToken(l)
     if mamyliste:
-        return pluralny(linie,msgid,msgid_plural,msgstrlist,komenty)
-    elif len(msgid)==0:
-        return metadane(linie,msgstr,komenty)
+        return pluralny(linie, msgid, msgid_plural, msgstrlist, komenty)
+    elif len(msgid) == 0:
+        return metadane(linie, msgstr, komenty)
     else:
-        return wpis(linie,msgid,msgstr,komenty)
+        return wpis(linie, msgid, msgstr, komenty)
 
 
 class PustaLinia(Exception):
     pass
 
 
-class UntiedQuote(UnknownToken):
-    pass
-
 class UnknownToken(Exception):
     pass
 
-def callbackentries(opened,callback):
+
+class UntiedQuote(UnknownToken):
+    pass
+
+
+def callbackentries(opened, callback):
     bufor = []
     for l in opened:
-        if len(l)==0:
-            if len(bufor)>0:
+        if len(l) == 0:
+            if len(bufor) > 0:
                 callback(tuple(bufor))
                 bufor = []
         else:
             bufor.append(l)
-    if len(bufor)>0:
+    if len(bufor) > 0:
         callback(bufor)
+
 
 class baza(Object):
 
     def __init__(opened):
         self.wpisy = []
-        callbackentries(opened,self.wpisy.append)
+        callbackentries(opened, self.wpisy.append)
         return self
 
 
