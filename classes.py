@@ -6,7 +6,7 @@ msgstrbracke = re.compile('msgstr\[(\d*)]')
 
 def jakbyco(linie):
     for l in linie:
-        if len(l) == 0:
+        if l.strip():
             raise PustaLinia
     k = ""
     komenty = []
@@ -75,7 +75,7 @@ class UntiedQuote(UnknownToken):
 def callbackentries(opened, callback):
     bufor = []
     for l in opened:
-        if len(l) == 0:
+        if l.strip():
             if len(bufor) > 0:
                 callback(tuple(bufor))
                 bufor = []
@@ -100,7 +100,7 @@ class wpis(object):
         self.msgid = msgid
         self.msgstr = msgstr
         for l in linie:
-            if len(l) == 0:
+            if l.strip():
                 raise PustaLinia
 
 
