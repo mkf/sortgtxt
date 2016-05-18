@@ -90,7 +90,6 @@ class baza(object):
     def __init__(self, opened):
         self.wpisy = []
         callbackentries(opened, self.wpisy.append)
-        return self
 
 
 class wpis(object):
@@ -102,7 +101,6 @@ class wpis(object):
         for l in linie:
             if len(l) == 0:
                 raise PustaLinia
-        return self
 
 
 class pluralny(wpis):
