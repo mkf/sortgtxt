@@ -9,11 +9,7 @@ def jakbyco(linie):
         if len(l) == 0:
             raise PustaLinia
     k = ""
-    transcomme = []
-    extracomme = []
-    refere = []
-    flagslines = []
-    previouscomme = []
+    komenty = []
     for l in linie:
         if l.startswith('"'):
             if k == "msgid":
@@ -45,15 +41,15 @@ def jakbyco(linie):
             msgstrlist.append((msgstrbracke.search(l), quot.search(l)))
             k = "msgstr["
         elif l.startswith("# "):
-            transcomme.append(l)
+            komenty.append(transcomme(l))
         elif l.startswith("#."):
-            extracomme.append(l)
+            komenty.append(extracomme(l))
         elif l.startswith("#:"):
-            refere.append(l)
+            komenty.append(refere(l))
         elif l.startswith("#,"):
-            flagslines.append(l)
+            komenty.append(flagsline(l))
         elif l.startswith("#|"):
-            previouscomme.append(l)
+            komenty.append(previouscomme(l))
 
 
 class PustaLinia(Exception):
@@ -72,12 +68,49 @@ class baza(Object):
 
 class wpis(Object):
 
-    def __init__(listoflines):
+    def __init__(self, listoflines, msgid, msgstr, komenty):
         self.listoflines = listoflines
+        self.msgid = msgid
+        self.msgstr = msgstr
         for l in linie:
             if len(l) == 0:
                 raise PustaLinia
 
 
+class pluralny(wpis):
+
+    def __init__(self, listoflines, msgid, msgid_plural, msgstrlist, komenty):
+        self.msgid_plural = msgid_plural
+        wpis.__init__(self, listoflines, msgid, msgstrlist, komenty)
+
+
 class metadane(wpis):
+
+    def __init__(self, listoflines, msgstr, komenty):
+        wpis.__init__(self, listoflines, "", msgstr, komenty)
+
+
+class comment(Object):
+
+    def __init__(self, line):
+        self.line = line
+
+
+class transcomme(comment):
+    pass
+
+
+class extracomme(comment):
+    pass
+
+
+class refere(comment):
+    pass
+
+
+class flagsline(comment):
+    pass
+
+
+class previouscomme(comment):
     pass
