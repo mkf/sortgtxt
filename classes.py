@@ -85,15 +85,15 @@ def callbackentries(opened, callback):
         callback(bufor)
 
 
-class baza(Object):
+class baza(object):
 
-    def __init__(opened):
+    def __init__(self, opened):
         self.wpisy = []
         callbackentries(opened, self.wpisy.append)
         return self
 
 
-class wpis(Object):
+class wpis(object):
 
     def __init__(self, listoflines, msgid, msgstr, komenty):
         self.listoflines = listoflines
@@ -118,7 +118,7 @@ class metadane(wpis):
         wpis.__init__(self, listoflines, "", msgstr, komenty)
 
 
-class comment(Object):
+class comment(object):
 
     def __init__(self, line):
         self.line = line
