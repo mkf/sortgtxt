@@ -140,5 +140,5 @@ class flagsline(comment):
 class previouscomme(comment):
     pass
 
-with f as open("django.po"):
+with open("django.po") as f:
     print(baza(f))
