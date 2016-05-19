@@ -101,6 +101,10 @@ class baza(object):
         self.wpisy = []
         callbackentries(opened, lambda x: self.wpisy.append(jakbyco(x)))
 
+    def rawzapisdopliku(self,opened):
+        for wpis in self.wpisy:
+            wpis.rawwrite(opened)
+
 
 class linijki(object):
 
@@ -124,6 +128,10 @@ class wpis(linijki):
             if not l.strip():
                 raise PustaLinia
         linijki.__init__(self, listoflines, komenty)
+
+    def rawwrite(self,opened):
+        for line in self.listoflines:
+            opened.write(line)
 
 
 class pluralny(wpis):
