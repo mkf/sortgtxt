@@ -118,6 +118,11 @@ class linijki(object):
     def __repr__(self):
         return str(self)
 
+    def rawwrite(self, opened):
+        for line in self.listoflines:
+            opened.write(line)
+        opened.write("\n")
+
 
 class wpis(linijki):
 
@@ -129,9 +134,6 @@ class wpis(linijki):
                 raise PustaLinia
         linijki.__init__(self, listoflines, komenty)
 
-    def rawwrite(self, opened):
-        for line in self.listoflines:
-            opened.write(line)
 
 
 class pluralny(wpis):
@@ -187,4 +189,10 @@ class tilded(comment):
     pass
 
 with open("django.po") as f:
-    print(baza(f).wpisy)
+    a = baza(f)
+    print(a.wpisy)
+
+with open("docel.po","w") as tar:
+    tar.truncate()
+    a.rawzapisdopliku(tar)
+    tar.close()
