@@ -90,7 +90,6 @@ def callbackentries(opened, callback):
                 bufor = []
         else:
             bufor.append(l)
-            print(l)
     if len(bufor) > 0:
         callback(tuple(bufor))
 
@@ -126,6 +125,9 @@ class Linijki(object):
             opened.write(line)
         opened.write("\n")
 
+    def sortingname(self):
+        return self.komenty[0].line
+
 
 class Wpis(Linijki):
 
@@ -136,6 +138,9 @@ class Wpis(Linijki):
             if not l.strip():
                 raise PustaLinia
         Linijki.__init__(self, listoflines, komenty)
+
+    def sortingname(self):
+        return self.msgid
 
 
 class Pluralny(Wpis):
