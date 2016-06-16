@@ -105,7 +105,7 @@ class Baza(object):
             wpis.rawwrite(opened)
 
     def sortbymsgid(self):
-        sorted(self.wpisy, key=lambda x: x.msgid if isinstance(x,Wpis) else x.komenty[0].line)
+        self.wpisy = sorted(self.wpisy, key=lambda x: x.sortingname())
 
 
 class Linijki(object):
@@ -126,6 +126,7 @@ class Linijki(object):
         opened.write("\n")
 
     def sortingname(self):
+        print(self.komenty[0].line)
         return self.komenty[0].line
 
 
@@ -140,6 +141,7 @@ class Wpis(Linijki):
         Linijki.__init__(self, listoflines, komenty)
 
     def sortingname(self):
+        print(self.msgid)
         return self.msgid
 
 
