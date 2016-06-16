@@ -135,7 +135,6 @@ class wpis(linijki):
         linijki.__init__(self, listoflines, komenty)
 
 
-
 class pluralny(wpis):
 
     def __init__(self, listoflines, msgid, msgid_plural, msgstrlist, komenty):
@@ -192,7 +191,7 @@ with open("django.po") as f:
     a = baza(f)
     print(a.wpisy)
 
-with open("docel.po","w") as tar:
+with open("docel.po", "w") as tar:
     tar.truncate()
     a.rawzapisdopliku(tar)
     tar.close()
