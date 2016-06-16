@@ -106,7 +106,7 @@ class Baza(object):
             wpis.rawwrite(opened)
 
     def sortbymsgid(self):
-        sorted(self.wpisy, key=lambda x: x.msgid if isinstance(x,wpis) else x.komenty[0].line)
+        sorted(self.wpisy, key=lambda x: x.msgid if isinstance(x,Wpis) else x.komenty[0].line)
 
 
 class Linijki(object):
