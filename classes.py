@@ -196,5 +196,6 @@ with open("django.po") as f:
 
 with open("docel.po", "w") as tar:
     tar.truncate()
+    a.sortbymsgid()
     a.rawzapisdopliku(tar)
     tar.close()
