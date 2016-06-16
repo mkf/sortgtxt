@@ -4,7 +4,7 @@ quot = re.compile('"([^"]*)"')
 msgstrbracke = re.compile('msgstr\[(\d*)]')
 
 
-def jakbyco(linie):
+def parse_entry(linie):
     for l in linie:
         if not l.strip():
             raise PustaLinia
@@ -44,29 +44,29 @@ def jakbyco(linie):
                 l).group(0), quot.search(l).group(0)))
             k = "msgstr["
         elif l.startswith("# "):
-            komenty.append(transcomme(l))
+            komenty.append(TransComment(l))
         elif l.startswith("#."):
-            komenty.append(extracomme(l))
+            komenty.append(ExtraComment(l))
         elif l.startswith("#:"):
-            komenty.append(refere(l))
+            komenty.append(ReferenceComment(l))
         elif l.startswith("#,"):
-            komenty.append(flagsline(l))
+            komenty.append(FlagsLine(l))
         elif l.startswith("#|"):
-            komenty.append(previouscomme(l))
+            komenty.append(PreviousComment(l))
         elif l.startswith("#~"):
-            komenty.append(tilded(l))
+            komenty.append(TildedComment(l))
         elif l.strip() == "#":
-            komenty.append(samhash(l))
+            komenty.append(Samhash(l))
         else:
             raise UnknownToken(l)
     if mamyliste:
-        return pluralny(linie, msgid, msgid_plural, msgstrlist, komenty)
+        return Pluralny(linie, msgid, msgid_plural, msgstrlist, komenty)
     elif msgid == False:
-        return linijki(linie, komenty)
+        return Linijki(linie, komenty)
     elif len(msgid) == 0:
-        return metadane(linie, msgstr, komenty)
+        return Metadane(linie, msgstr, komenty)
     else:
-        return wpis(linie, msgid, msgstr, komenty)
+        return Wpis(linie, msgid, msgstr, komenty)
 
 
 class PustaLinia(Exception):
@@ -95,11 +95,11 @@ def callbackentries(opened, callback):
         callback(tuple(bufor))
 
 
-class baza(object):
+class Baza(object):
 
     def __init__(self, opened):
         self.wpisy = []
-        callbackentries(opened, lambda x: self.wpisy.append(jakbyco(x)))
+        callbackentries(opened, lambda x: self.wpisy.append(parse_entry(x)))
 
     def rawzapisdopliku(self, opened):
         for wpis in self.wpisy:
@@ -109,7 +109,7 @@ class baza(object):
         sorted(self.wpisy, key=lambda x: x.msgid if isinstance(x,wpis) else x.komenty[0].line)
 
 
-class linijki(object):
+class Linijki(object):
 
     def __init__(self, listoflines, komenty):
         self.listoflines = listoflines
@@ -127,7 +127,7 @@ class linijki(object):
         opened.write("\n")
 
 
-class wpis(linijki):
+class Wpis(Linijki):
 
     def __init__(self, listoflines, msgid, msgstr, komenty):
         self.msgid = msgid
@@ -135,24 +135,23 @@ class wpis(linijki):
         for l in listoflines:
             if not l.strip():
                 raise PustaLinia
-        linijki.__init__(self, listoflines, komenty)
+        Linijki.__init__(self, listoflines, komenty)
 
 
-
-class pluralny(wpis):
+class Pluralny(Wpis):
 
     def __init__(self, listoflines, msgid, msgid_plural, msgstrlist, komenty):
         self.msgid_plural = msgid_plural
-        wpis.__init__(self, listoflines, msgid, msgstrlist, komenty)
+        Wpis.__init__(self, listoflines, msgid, msgstrlist, komenty)
 
 
-class metadane(wpis):
+class Metadane(Wpis):
 
     def __init__(self, listoflines, msgstr, komenty):
-        wpis.__init__(self, listoflines, "", msgstr, komenty)
+        Wpis.__init__(self, listoflines, "", msgstr, komenty)
 
 
-class comment(object):
+class Comment(object):
 
     def __init__(self, line):
         self.line = line
@@ -164,38 +163,38 @@ class comment(object):
         return self.line
 
 
-class samhash(comment):
+class SamHash(Comment):
     pass
 
 
-class transcomme(comment):
+class TransComment(Comment):
     pass
 
 
-class extracomme(comment):
+class ExtraComment(Comment):
     pass
 
 
-class refere(comment):
+class ReferenceComment(Comment):
     pass
 
 
-class flagsline(comment):
+class FlagsLine(Comment):
     pass
 
 
-class previouscomme(comment):
+class PreviousComment(Comment):
     pass
 
 
-class tilded(comment):
+class TildedComment(Comment):
     pass
 
 with open("django.po") as f:
-    a = baza(f)
+    a = Baza(f)
     print(a.wpisy)
 
-with open("docel.po","w") as tar:
+with open("docel.po", "w") as tar:
     tar.truncate()
     a.rawzapisdopliku(tar)
     tar.close()
