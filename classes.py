@@ -4,7 +4,7 @@ quot = re.compile('"([^"]*)"')
 msgstrbracke = re.compile('msgstr\[(\d*)]')
 
 
-def jakbyco(linie):
+def parse_entry(linie):
     for l in linie:
         if not l.strip():
             raise PustaLinia
@@ -99,7 +99,7 @@ class baza(object):
 
     def __init__(self, opened):
         self.wpisy = []
-        callbackentries(opened, lambda x: self.wpisy.append(jakbyco(x)))
+        callbackentries(opened, lambda x: self.wpisy.append(parse_entry(x)))
 
     def rawzapisdopliku(self, opened):
         for wpis in self.wpisy:
