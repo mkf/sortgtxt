@@ -56,7 +56,7 @@ def parse_entry(linie):
         elif l.startswith("#~"):
             komenty.append(TildedComment(l))
         elif l.strip() == "#":
-            komenty.append(Samhash(l))
+            komenty.append(SamHash(l))
         else:
             raise UnknownToken(l)
     if mamyliste:
