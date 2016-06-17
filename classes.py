@@ -100,6 +100,7 @@ class Baza(object):
         self.wpisy = []
         callbackentries(opened, lambda x: self.wpisy.append(parse_entry(x)))
         for i in range(len(self.wpisy)):
+            print(type(self.wpisy[i]))
             if isinstance(self.wpisy[i],Metadane):
                 self.metadane = self.wpisy.pop(i)
 
