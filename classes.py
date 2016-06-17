@@ -1,6 +1,6 @@
 import re
 
-quot = re.compile('"([^"]*)"')
+quot = re.compile(r'"([^"]*)"')
 msgstrbracke = re.compile('msgstr\[(\d*)]')
 
 
