@@ -100,10 +100,12 @@ class Baza(object):
     def __init__(self, opened):
         self.wpisy = []
         callbackentries(opened, lambda x: self.wpisy.append(parse_entry(x)))
+        popthem = []
         for i in range(len(self.wpisy)):
-            print(type(self.wpisy[i]))
             if isinstance(self.wpisy[i],Metadane):
-                self.metadane = self.wpisy.pop(i)
+                popthem.append(i)
+        for i in popthem:
+            self.metadane = self.wpisy.pop(i)
 
     def rawzapisdopliku(self, opened):
         self.metadane.rawwrite(opened)
