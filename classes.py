@@ -24,7 +24,7 @@ def parse_entry(linie):
                 msgstr += denormalize(quot.findall(l)[0])
             elif k == "msgstr[":
                 a = msgstrlist.pop()
-                a += denormalize(quot.findall(l)[0]0
+                a += denormalize(quot.findall(l)[0])
                 msgstrlist.append(a)
             else:
                 raise UntiedQuote(l)
