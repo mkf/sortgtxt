@@ -1,4 +1,5 @@
 import re
+from babel.messages.pofile import denormalize
 
 quot = re.compile(r'"(?:\\.|[^"\\])*"')
 
@@ -16,32 +17,32 @@ def parse_entry(linie):
     for l in linie:
         if l.startswith('"'):
             if k == "msgid":
-                msgid += quot.findall(l)[0]
+                msgid += denormalize(quot.findall(l)[0])
             elif k == "msgid_plural":
-                msgid_plural += quot.findall(l)[0]
+                msgid_plural += denormalize(quot.findall(l)[0])
             elif k == "msgstr":
-                msgstr += quot.findall(l)[0]
+                msgstr += denormalize(quot.findall(l)[0])
             elif k == "msgstr[":
                 a = msgstrlist.pop()
-                a += quot.findall(l)[0]
+                a += denormalize(quot.findall(l)[0]0
                 msgstrlist.append(a)
             else:
                 raise UntiedQuote(l)
 
         elif l.startswith("msgid "):
-            msgid = quot.findall(l)[0]
+            msgid = denormalize(quot.findall(l)[0])
             k = "msgid"
         elif l.startswith("msgid_plural "):
-            msgid_plural = quot.findall(l)[0]
+            msgid_plural = denormalize(quot.findall(l)[0])
             k = "msgid_plural"
         elif l.startswith("msgstr "):
-            msgstr = quot.findall(l)[0]
+            msgstr = denormalize(quot.findall(l)[0])
             k = "msgstr"
         elif l.startswith("msgstr["):
             if not mamyliste:
                 mamyliste = True
                 msgstrlist = []
-            msgstrlist.append((msgstrbracke.findall(l)[0], quot.findall(l)[0]))
+            msgstrlist.append((msgstrbracke.findall(l)[0], denormalize(quot.findall(l)[0])))
             k = "msgstr["
         elif l.startswith("# "):
             komenty.append(TransComment(l))
