@@ -220,7 +220,9 @@ class PreviousComment(Comment):
 class TildedComment(Comment):
 
     def has_msgid(self):
-        if self.line.startswith("#~ msgid "):
+        if self.line.startswith(r'#~ msgid ""'):
+            return denormalize(quot.findall(self.line)[0])+"" #TODO
+        elif self.line.startswith("#~ msgid "):
             return denormalize(quot.findall(self.line)[0])
         else:
             return None
