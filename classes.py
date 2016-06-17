@@ -42,7 +42,8 @@ def parse_entry(linie):
             if not mamyliste:
                 mamyliste = True
                 msgstrlist = []
-            msgstrlist.append((msgstrbracke.findall(l)[0], denormalize(quot.findall(l)[0])))
+            msgstrlist.append((msgstrbracke.findall(
+                l)[0], denormalize(quot.findall(l)[0])))
             k = "msgstr["
         elif l.startswith("# "):
             komenty.append(TransComment(l))
@@ -102,7 +103,7 @@ class Baza(object):
         callbackentries(opened, lambda x: self.wpisy.append(parse_entry(x)))
         popthem = []
         for i in range(len(self.wpisy)):
-            if isinstance(self.wpisy[i],Metadane):
+            if isinstance(self.wpisy[i], Metadane):
                 popthem.append(i)
         for i in popthem:
             self.metadane = self.wpisy.pop(i)
@@ -121,6 +122,15 @@ class Linijki(object):
     def __init__(self, listoflines, komenty):
         self.listoflines = listoflines
         self.komenty = komenty
+        self.getourid()
+
+    def getourid(self):
+        self.cmsgid = None
+        if not isinstance(self, Wpis):
+            for i in self.komenty:
+                if isinstance(i, TildedComment):
+                    self.cmsgid = i.has_msgid()
+                    break
 
     def __str__(self):
         return str(self.listoflines) + "\nkomenty:" + str(self.komenty)
@@ -134,6 +144,8 @@ class Linijki(object):
         opened.write("\n")
 
     def sortingname(self):
+        if self.cmsgid is not None:
+            return self.cmsgid
         print(self.komenty[0].line)
         return self.komenty[0].line
 
@@ -151,6 +163,9 @@ class Wpis(Linijki):
     def sortingname(self):
         print(self.msgid)
         return self.msgid
+
+    def getourid(self):
+        pass
 
 
 class Pluralny(Wpis):
@@ -203,7 +218,12 @@ class PreviousComment(Comment):
 
 
 class TildedComment(Comment):
-    pass
+
+    def has_msgid(self):
+        if self.line.startswith("#~ msgid "):
+            return denormalize(quot.findall(self.line)[0])
+        else:
+            return None
 
 with open("django.po") as f:
     a = Baza(f)
