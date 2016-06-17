@@ -1,6 +1,7 @@
 import re
 
-quot = re.compile(r'"([^"]*)"')
+quot = re.compile(r'"(?:\\.|[^"\\])*"')
+
 msgstrbracke = re.compile('msgstr\[(\d*)]')
 
 
@@ -15,33 +16,32 @@ def parse_entry(linie):
     for l in linie:
         if l.startswith('"'):
             if k == "msgid":
-                msgid += quot.search(l).group(0)
+                msgid += quot.findall(l)[0]
             elif k == "msgid_plural":
-                msgid_plural += quot.search(l).group(0)
+                msgid_plural += quot.findall(l)[0]
             elif k == "msgstr":
-                msgstr += quot.search(l).group(0)
+                msgstr += quot.findall(l)[0]
             elif k == "msgstr[":
                 a = msgstrlist.pop()
-                a += quot.search(l).group(0)
+                a += quot.findall(l)[0]
                 msgstrlist.append(a)
             else:
                 raise UntiedQuote(l)
 
         elif l.startswith("msgid "):
-            msgid = quot.search(l).group(0)
+            msgid = quot.findall(l)[0]
             k = "msgid"
         elif l.startswith("msgid_plural "):
-            msgid_plural = quot.search(l).group(0)
+            msgid_plural = quot.findall(l)[0]
             k = "msgid_plural"
         elif l.startswith("msgstr "):
-            msgstr = quot.search(l).group(0)
+            msgstr = quot.findall(l)[0]
             k = "msgstr"
         elif l.startswith("msgstr["):
             if not mamyliste:
                 mamyliste = True
                 msgstrlist = []
-            msgstrlist.append((msgstrbracke.search(
-                l).group(0), quot.search(l).group(0)))
+            msgstrlist.append((msgstrbracke.findall(l)[0], quot.findall(l)[0]))
             k = "msgstr["
         elif l.startswith("# "):
             komenty.append(TransComment(l))
