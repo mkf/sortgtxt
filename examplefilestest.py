@@ -1,10 +1,10 @@
-import classes
+import sortgtxt
 
 with open("django.po") as f:
-    a = classes.Baza(f)
+    a = sortgtxt.Baza(f)
 
 with open("djangomixed.po") as g:
-    b = classes.Baza(g)
+    b = sortgtxt.Baza(g)
 
 with open("docel.po", "w") as tar:
     tar.truncate()
