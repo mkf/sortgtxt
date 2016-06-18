@@ -242,21 +242,3 @@ class TildedComment(Comment):
             return denormalize(quot.findall(self.line)[0])
         else:
             return None
-
-with open("django.po") as f:
-    a = Baza(f)
-
-with open("djangomixed.po") as g:
-    b = Baza(g)
-
-with open("docel.po", "w") as tar:
-    tar.truncate()
-    a.sortbymsgid()
-    a.rawzapisdopliku(tar)
-    tar.close()
-
-with open("docelmixed.po", "w") as toa:
-    toa.truncate()
-    b.sortbymsgid()
-    b.rawzapisdopliku(toa)
-    toa.close()
