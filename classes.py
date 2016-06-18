@@ -45,8 +45,10 @@ def parse_entry(linie):
             if not mamyliste:
                 mamyliste = True
                 msgstrlist = []
-            msgstrlist.append((msgstrbracke.findall(
-                l)[0], denormalize(quot.findall(l)[0])))
+            msgstrlist.append((
+                msgstrbracke.findall(l)[0], 
+                denormalize(quot.findall(l)[0])
+            ))
             k = "msgstr["
         elif l.startswith("# "):
             komenty.append(TransComment(l))
