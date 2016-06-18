@@ -6,12 +6,15 @@ from babel.messages.pofile import denormalize
 # that's a fairly large dependency, from which I am using just a few lines
 # of code (denormalize() function, and its dependency, unescape())
 
+# regex for finding quotes
 quot = re.compile(r'"(?:\\.|[^"\\])*"')
 
+# regex for finding msgstr lists in plural entries
 msgstrbracke = re.compile('msgstr\[(\d*)]')
 
 
 def parse_entry(lines):
+    """Function for parsing a single entry, raising EmptyLine in case of an empty line"""
     for l in lines:
         if not l.strip():
             raise EmptyLine
@@ -48,7 +51,7 @@ def parse_entry(lines):
                 listfound = True
                 msgstrlist = []
             msgstrlist.append((
-                msgstrbracke.findall(l)[0], 
+                msgstrbracke.findall(l)[0],
                 denormalize(quot.findall(l)[0])
             ))
             k = "msgstr["
@@ -79,18 +82,22 @@ def parse_entry(lines):
 
 
 class EmptyLine(Exception):
+    """EmptyLine is raised in case an entry contains an empty line"""
     pass
 
 
 class UnknownToken(Exception):
+    """UnknownToken is raised in case there is an unknown token at the beginning of a line"""
     pass
 
 
 class UntiedQuote(UnknownToken):
+    """UntiedQuote is raised in case there is a string untied to some other token, like msgid, msgstr..."""
     pass
 
 
 def callbackentries(opened, callback):
+    """callbackentries separates entries separated with empty lines and calls callback(tuple_of_entry_lines)"""
     bufor = []
     for l in opened:
         if not l.strip():
@@ -104,6 +111,7 @@ def callbackentries(opened, callback):
 
 
 class Catalog(object):
+    """Catalog represents a single .po file"""
 
     def __init__(self, opened):
         self.entries = []
@@ -125,6 +133,7 @@ class Catalog(object):
 
 
 class SomeLines(object):
+    """SomeLines represents some lines from between two empty lines, not necessarily an Entry"""
 
     def __init__(self, listoflines, comments):
         self.listoflines = listoflines
@@ -165,6 +174,7 @@ class SomeLines(object):
 
 
 class Entry(SomeLines):
+    """Entry represents an entry (with msgid and msgstr), inheritts from SomeLines"""
 
     def __init__(self, listoflines, msgid, msgstr, comments):
         self.msgid = msgid
@@ -190,6 +200,7 @@ class Plural(Entry):
 
 
 class Meta(Entry):
+    """Meta is an Entry eith msgid \"\", which has metadata in comments"""
 
     def __init__(self, listoflines, msgstr, comments):
         Entry.__init__(self, listoflines, "", msgstr, comments)
@@ -208,6 +219,7 @@ class Comment(object):
 
 
 class SamHash(Comment):
+    """SamHash is a comment without content, just the hash (#)"""
     pass
 
 
