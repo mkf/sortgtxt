@@ -3,10 +3,10 @@
 import sortgtxt
 
 with open("django.po") as f:
-    a = sortgtxt.Baza(f)
+    a = sortgtxt.Catalog(f)
 
 with open("djangomixed.po") as g:
-    b = sortgtxt.Baza(g)
+    b = sortgtxt.Catalog(g)
 
 with open("docel.po", "w") as tar:
     tar.truncate()

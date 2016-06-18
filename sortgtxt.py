@@ -11,15 +11,15 @@ quot = re.compile(r'"(?:\\.|[^"\\])*"')
 msgstrbracke = re.compile('msgstr\[(\d*)]')
 
 
-def parse_entry(linie):
-    for l in linie:
+def parse_entry(lines):
+    for l in lines:
         if not l.strip():
-            raise PustaLinia
+            raise EmptyLine
     k = ""
-    komenty = []
-    mamyliste = False
+    comments = []
+    listfound = False
     msgid = False
-    for l in linie:
+    for l in lines:
         if l.startswith('"'):
             if k == "msgid":
                 msgid += denormalize(quot.findall(l)[0])
@@ -44,8 +44,8 @@ def parse_entry(linie):
             msgstr = denormalize(quot.findall(l)[0])
             k = "msgstr"
         elif l.startswith("msgstr["):
-            if not mamyliste:
-                mamyliste = True
+            if not listfound:
+                listfound = True
                 msgstrlist = []
             msgstrlist.append((
                 msgstrbracke.findall(l)[0], 
@@ -53,32 +53,32 @@ def parse_entry(linie):
             ))
             k = "msgstr["
         elif l.startswith("# "):
-            komenty.append(TransComment(l))
+            comments.append(TransComment(l))
         elif l.startswith("#."):
-            komenty.append(ExtraComment(l))
+            comments.append(ExtraComment(l))
         elif l.startswith("#:"):
-            komenty.append(ReferenceComment(l))
+            comments.append(ReferenceComment(l))
         elif l.startswith("#,"):
-            komenty.append(FlagsLine(l))
+            comments.append(FlagsLine(l))
         elif l.startswith("#|"):
-            komenty.append(PreviousComment(l))
+            comments.append(PreviousComment(l))
         elif l.startswith("#~"):
-            komenty.append(TildedComment(l))
+            comments.append(TildedComment(l))
         elif l.strip() == "#":
-            komenty.append(SamHash(l))
+            comments.append(SamHash(l))
         else:
             raise UnknownToken(l)
-    if mamyliste:
-        return Pluralny(linie, msgid, msgid_plural, msgstrlist, komenty)
+    if listfound:
+        return Plural(lines, msgid, msgid_plural, msgstrlist, comments)
     elif msgid == False:
-        return Linijki(linie, komenty)
+        return SomeLines(lines, comments)
     elif len(msgid) == 0:
-        return Metadane(linie, msgstr, komenty)
+        return Meta(lines, msgstr, comments)
     else:
-        return Wpis(linie, msgid, msgstr, komenty)
+        return Entry(lines, msgid, msgstr, comments)
 
 
-class PustaLinia(Exception):
+class EmptyLine(Exception):
     pass
 
 
@@ -103,38 +103,38 @@ def callbackentries(opened, callback):
         callback(tuple(bufor))
 
 
-class Baza(object):
+class Catalog(object):
 
     def __init__(self, opened):
-        self.wpisy = []
-        callbackentries(opened, lambda x: self.wpisy.append(parse_entry(x)))
+        self.entries = []
+        callbackentries(opened, lambda x: self.entries.append(parse_entry(x)))
         popthem = []
-        for i in range(len(self.wpisy)):
-            if isinstance(self.wpisy[i], Metadane):
+        for i in range(len(self.entries)):
+            if isinstance(self.entries[i], Meta):
                 popthem.append(i)
         for i in popthem:
-            self.metadane = self.wpisy.pop(i)
+            self.meta = self.entries.pop(i)
 
     def rawzapisdopliku(self, opened):
-        self.metadane.rawwrite(opened)
-        for wpis in self.wpisy:
-            wpis.rawwrite(opened)
+        self.meta.rawwrite(opened)
+        for entry in self.entries:
+            entry.rawwrite(opened)
 
     def sortbymsgid(self):
-        self.wpisy = sorted(self.wpisy, key=lambda x: x.sortingname())
+        self.entries = sorted(self.entries, key=lambda x: x.sortingname())
 
 
-class Linijki(object):
+class SomeLines(object):
 
-    def __init__(self, listoflines, komenty):
+    def __init__(self, listoflines, comments):
         self.listoflines = listoflines
-        self.komenty = komenty
+        self.comments = comments
         self.getourid()
 
     def getourid(self):
         cmsgid = None
-        if not isinstance(self, Wpis):
-            for i in self.komenty:
+        if not isinstance(self, Entry):
+            for i in self.comments:
                 if isinstance(i, TildedComment):
                     if cmsgid is None:
                         a = i.has_msgid()
@@ -147,7 +147,7 @@ class Linijki(object):
         self.cmsgid = ''.join(cmsgid)
 
     def __str__(self):
-        return str(self.listoflines) + "\nkomenty:" + str(self.komenty)
+        return str(self.listoflines) + "\ncomments:" + str(self.comments)
 
     def __repr__(self):
         return str(self)
@@ -160,19 +160,19 @@ class Linijki(object):
     def sortingname(self):
         if self.cmsgid is not None:
             return self.cmsgid
-        print(self.komenty[0].line)
-        return self.komenty[0].line
+        print(self.comments[0].line)
+        return self.comments[0].line
 
 
-class Wpis(Linijki):
+class Entry(SomeLines):
 
-    def __init__(self, listoflines, msgid, msgstr, komenty):
+    def __init__(self, listoflines, msgid, msgstr, comments):
         self.msgid = msgid
         self.msgstr = msgstr
         for l in listoflines:
             if not l.strip():
-                raise PustaLinia
-        Linijki.__init__(self, listoflines, komenty)
+                raise EmptyLine
+        SomeLines.__init__(self, listoflines, comments)
 
     def sortingname(self):
         print(self.msgid)
@@ -182,17 +182,17 @@ class Wpis(Linijki):
         pass
 
 
-class Pluralny(Wpis):
+class Plural(Entry):
 
-    def __init__(self, listoflines, msgid, msgid_plural, msgstrlist, komenty):
+    def __init__(self, listoflines, msgid, msgid_plural, msgstrlist, comments):
         self.msgid_plural = msgid_plural
-        Wpis.__init__(self, listoflines, msgid, msgstrlist, komenty)
+        Entry.__init__(self, listoflines, msgid, msgstrlist, comments)
 
 
-class Metadane(Wpis):
+class Meta(Entry):
 
-    def __init__(self, listoflines, msgstr, komenty):
-        Wpis.__init__(self, listoflines, "", msgstr, komenty)
+    def __init__(self, listoflines, msgstr, comments):
+        Entry.__init__(self, listoflines, "", msgstr, comments)
 
 
 class Comment(object):
