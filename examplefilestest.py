@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import sortgtxt
 
 with open("django.po") as f:
