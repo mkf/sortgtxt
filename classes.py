@@ -1,5 +1,8 @@
 import re
+
 from babel.messages.pofile import denormalize
+# that's a fairly large dependency, from which I am using just a few lines
+# of code (denormalize() function, and its dependency, unescape())
 
 quot = re.compile(r'"(?:\\.|[^"\\])*"')
 
@@ -132,12 +135,12 @@ class Linijki(object):
                     if cmsgid is None:
                         a = i.has_msgid()
                         if a is not None:
-                            cmsgid = [a,]
+                            cmsgid = [a, ]
                     else:
-                        a=i.has_quot()
+                        a = i.has_quot()
                         if a is not None:
                             cmsgid.append(a)
-        self.cmsgid=''.join(cmsgid)
+        self.cmsgid = ''.join(cmsgid)
 
     def __str__(self):
         return str(self.listoflines) + "\nkomenty:" + str(self.komenty)
@@ -231,6 +234,7 @@ class TildedComment(Comment):
             return denormalize(quot.findall(self.line)[0])
         else:
             return None
+
     def has_quot(self):
         if self.line.startswith('#~ "'):
             return denormalize(quot.findall(self.line)[0])
