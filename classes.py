@@ -125,12 +125,19 @@ class Linijki(object):
         self.getourid()
 
     def getourid(self):
-        self.cmsgid = None
+        cmsgid = None
         if not isinstance(self, Wpis):
             for i in self.komenty:
                 if isinstance(i, TildedComment):
-                    self.cmsgid = i.has_msgid()
-                    break
+                    if cmsgid is None:
+                        a = i.has_msgid()
+                        if a is not None:
+                            cmsgid = [a,]
+                    else:
+                        a=i.has_quot()
+                        if a is not None:
+                            cmsgid.append(a)
+        self.cmsgid=''.join(cmsgid)
 
     def __str__(self):
         return str(self.listoflines) + "\nkomenty:" + str(self.komenty)
@@ -221,6 +228,11 @@ class TildedComment(Comment):
 
     def has_msgid(self):
         if self.line.startswith("#~ msgid "):
+            return denormalize(quot.findall(self.line)[0])
+        else:
+            return None
+    def has_quot(self):
+        if self.line.startswith('#~ "'):
             return denormalize(quot.findall(self.line)[0])
         else:
             return None
