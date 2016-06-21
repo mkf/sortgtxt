@@ -13,8 +13,36 @@ quot = re.compile(r'"(?:\\.|[^"\\])*"')
 msgstrbracke = re.compile('msgstr\[(\d*)]')
 
 
+def getquot(line):
+    return denormalize(quot.findall(line)[0])
+
+
+def msgstrdigit(line):
+    return msgstrbracke.findall(line)[0]
+
+
+def startswithhash(l):
+    if l.startswith("# "):
+        return TransComment(l)
+    elif l.startswith("#."):
+        return ExtraComment(l)
+    elif l.startswith("#:"):
+        return ReferenceComment(l)
+    elif l.startswith("#,"):
+        return FlagsLine(l)
+    elif l.startswith("#|"):
+        return PreviousComment(l)
+    elif l.startswith("#~"):
+        return TildedComment(l)
+    elif l.strip() == "#":
+        return SamHash(l)
+    else:
+        raise UnknownToken(l)
+
+
 def parse_entry(lines):
-    """Function for parsing a single entry, raising EmptyLine in case of an empty line"""
+    """Function for parsing a single entry,
+    raising EmptyLine in case of an empty line"""
     for l in lines:
         if not l.strip():
             raise EmptyLine
@@ -22,63 +50,60 @@ def parse_entry(lines):
     comments = []
     listfound = False
     msgid = False
+    msgid_plural = None
+    msgstr = None
+    msgctxt = None
+    msgstrlist = None
     for l in lines:
         if l.startswith('"'):
             if k == "msgid":
-                msgid += denormalize(quot.findall(l)[0])
+                msgid += getquot(l)
             elif k == "msgid_plural":
-                msgid_plural += denormalize(quot.findall(l)[0])
+                msgid_plural += getquot(l)
             elif k == "msgstr":
-                msgstr += denormalize(quot.findall(l)[0])
+                msgstr += getquot(l)
+            elif k == "msgctxt":
+                msgctxt += getquot(l)
             elif k == "msgstr[":
                 a = msgstrlist.pop()
-                a += denormalize(quot.findall(l)[0])
+                a += getquot(l)
                 msgstrlist.append(a)
             else:
                 raise UntiedQuote(l)
 
         elif l.startswith("msgid "):
-            msgid = denormalize(quot.findall(l)[0])
+            msgid = getquot(l)
             k = "msgid"
         elif l.startswith("msgid_plural "):
-            msgid_plural = denormalize(quot.findall(l)[0])
+            msgid_plural = getquot(l)
             k = "msgid_plural"
         elif l.startswith("msgstr "):
-            msgstr = denormalize(quot.findall(l)[0])
+            msgstr = getquot(l)
             k = "msgstr"
+        elif l.startswith("msgctxt "):
+            msgctxt = getquot(l)
+            k = "msgctxt"
         elif l.startswith("msgstr["):
             if not listfound:
                 listfound = True
                 msgstrlist = []
             msgstrlist.append((
-                msgstrbracke.findall(l)[0],
-                denormalize(quot.findall(l)[0])
+                msgstrdigit(l),
+                getquot(l)
             ))
             k = "msgstr["
-        elif l.startswith("# "):
-            comments.append(TransComment(l))
-        elif l.startswith("#."):
-            comments.append(ExtraComment(l))
-        elif l.startswith("#:"):
-            comments.append(ReferenceComment(l))
-        elif l.startswith("#,"):
-            comments.append(FlagsLine(l))
-        elif l.startswith("#|"):
-            comments.append(PreviousComment(l))
-        elif l.startswith("#~"):
-            comments.append(TildedComment(l))
-        elif l.strip() == "#":
-            comments.append(SamHash(l))
+        elif l.startswith("#"):
+            comments.append(startswithhash(l))
         else:
             raise UnknownToken(l)
     if listfound:
-        return Plural(lines, msgid, msgid_plural, msgstrlist, comments)
-    elif msgid == False:
+        return Plural(lines, msgid, msgid_plural, msgstrlist, comments, msgctxt=msgctxt)
+    elif msgid is False:
         return SomeLines(lines, comments)
     elif len(msgid) == 0:
-        return Meta(lines, msgstr, comments)
+        return Meta(lines, msgstr, comments, msgctxt=msgctxt)
     else:
-        return Entry(lines, msgid, msgstr, comments)
+        return Entry(lines, msgid, msgstr, comments, msgctxt=msgctxt)
 
 
 class EmptyLine(Exception):
@@ -176,7 +201,7 @@ class SomeLines(object):
 class Entry(SomeLines):
     """Entry represents an entry (with msgid and msgstr), inheritts from SomeLines"""
 
-    def __init__(self, listoflines, msgid, msgstr, comments):
+    def __init__(self, listoflines, msgid, msgstr, comments, msgctxt=None):
         self.msgid = msgid
         self.msgstr = msgstr
         for l in listoflines:
@@ -194,16 +219,17 @@ class Entry(SomeLines):
 
 class Plural(Entry):
 
-    def __init__(self, listoflines, msgid, msgid_plural, msgstrlist, comments):
+    def __init__(self, listoflines, msgid, msgid_plural, msgstrlist, comments, msgctxt=None):
         self.msgid_plural = msgid_plural
-        Entry.__init__(self, listoflines, msgid, msgstrlist, comments)
+        Entry.__init__(self, listoflines, msgid, msgstrlist,
+                       comments, msgctxt=msgctxt)
 
 
 class Meta(Entry):
     """Meta is an Entry eith msgid \"\", which has metadata in comments"""
 
-    def __init__(self, listoflines, msgstr, comments):
-        Entry.__init__(self, listoflines, "", msgstr, comments)
+    def __init__(self, listoflines, msgstr, comments, msgctxt=None):
+        Entry.__init__(self, listoflines, "", msgstr, comments, msgctxt=msgctxt)
 
 
 class Comment(object):
