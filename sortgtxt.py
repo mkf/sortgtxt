@@ -225,7 +225,7 @@ class Entry(SomeLines):
         for l in listoflines:
             if not l.strip():
                 raise EmptyLine
-        super().__init__(self, listoflines, comments)
+        SomeLines.__init__(self, listoflines, comments)
 
     def sortingname(self):
         print(self.msgid)
@@ -240,16 +240,16 @@ class Plural(Entry):
     def __init__(self, listoflines, msgid, msgid_plural,
                  msgstrlist, comments, msgctxt=None):
         self.msgid_plural = msgid_plural
-        super().__init__(self, listoflines, msgid, msgstrlist,
-                         comments, msgctxt=msgctxt)
+        Entry.__init__(self, listoflines, msgid, msgstrlist,
+                       comments, msgctxt=msgctxt)
 
 
 class Meta(Entry):
     """Meta is an Entry eith msgid \"\", which has metadata in comments"""
 
     def __init__(self, listoflines, msgstr, comments, msgctxt=None):
-        super().__init__(self, listoflines, "",
-                         msgstr, comments, msgctxt=msgctxt)
+        Entry.__init__(self, listoflines, "",
+                       msgstr, comments, msgctxt=msgctxt)
 
 
 class Comment(object):

@@ -2,20 +2,12 @@
 
 import sortgtxt
 
-with open("django.po") as f:
-    a = sortgtxt.Catalog(f)
+a = sortgtxt.Catalog(filename="django.po")
 
-with open("djangomixed.po") as g:
-    b = sortgtxt.Catalog(g)
+b = sortgtxt.Catalog(filename="djangomixed.po")
 
-with open("docel.po", "w") as tar:
-    tar.truncate()
-    a.sortbymsgid()
-    a.rawzapisdopliku(tar)
-    tar.close()
+a.sortbymsgid()
+a.rawsave(filename="docel.po")
 
-with open("docelmixed.po", "w") as toa:
-    toa.truncate()
-    b.sortbymsgid()
-    b.rawzapisdopliku(toa)
-    toa.close()
+b.sortbymsgid()
+b.rawsave(filename="docelmixed.po")
