@@ -49,7 +49,7 @@ class Catalog(object):
     def __init__(self, opened=None, filename=None):
         if opened is None:
             with open(filename, "r") as ouropened:
-                return self.__init__(ouropened)
+                return Catalog.__init__(self, opened=ouropened)
         self.entries = []
         callbackentries(
             opened, lambda x: self.entries.append(self.parse_entry(x)))
@@ -171,6 +171,34 @@ class Catalog(object):
             return Meta(lines, msgstr, comments, msgctxt=msgctxt)
         else:
             return Entry(lines, msgid, msgstr, comments, msgctxt=msgctxt)
+
+
+class POFileSorter(Catalog):
+    """Just some shortcuts of Catalog usage.
+    Personally I do not recommend using them."""
+
+    def __init__(self, filename):
+        self.filename = filename
+        Catalog.__init__(self, filename=filename)
+
+    @staticmethod
+    def _defaultbackupfname():
+        from datetime import datetime
+        return ''.join([
+            "django_backups_",
+            datetime.now().strftime("%Y%d%m%H%M%S"),
+            ".po",
+        ])
+
+    def sort_and_save(
+            self, output_filename="foo.po",
+            backup=True,
+            backup_filename=lambda: POFileSorter._defaultbackupfname()):
+        if backup:
+            from shutil import copyfile
+            copyfile(self.filename, backup_filename())
+        self.sortbymsgid()
+        self.rawsave(filename=output_filename)
 
 
 class SomeLines(object):

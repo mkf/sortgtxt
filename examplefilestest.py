@@ -11,3 +11,6 @@ a.rawsave(filename="docel.po")
 
 b.sortbymsgid()
 b.rawsave(filename="docelmixed.po")
+
+c = sortgtxt.POFileSorter("django.po")
+c.sort_and_save()
