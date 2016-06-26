@@ -2,9 +2,7 @@
 
 import re
 
-from babel.messages.pofile import denormalize
-# that's a fairly large dependency, from which I am using just a few lines
-# of code (denormalize() function, and its dependency, unescape())
+from babeldenormalize import denormalize
 
 # regex for finding quotes
 quot = re.compile(r'"(?:\\.|[^"\\])*"')
