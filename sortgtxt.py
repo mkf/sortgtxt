@@ -17,17 +17,20 @@ class EmptyLine(Exception):
 
 
 class UnknownToken(Exception):
-    """UnknownToken is raised in case there is an unknown token at the beginning of a line"""
+    """UnknownToken is raised in case there is an unknown token at the beginning
+    of a line"""
     pass
 
 
 class UntiedQuote(UnknownToken):
-    """UntiedQuote is raised in case there is a string untied to some other token, like msgid, msgstr..."""
+    """UntiedQuote is raised in case there is a string untied to some other
+    token, like msgid, msgstr..."""
     pass
 
 
 def callbackentries(opened, callback):
-    """callbackentries separates entries separated with empty lines and calls callback(tuple_of_entry_lines)"""
+    """callbackentries separates entries separated with empty lines and calls
+    callback(tuple_of_entry_lines)"""
     bufor = []
     for l in opened:
         if not l.strip():
@@ -43,7 +46,10 @@ def callbackentries(opened, callback):
 class Catalog(object):
     """Catalog represents a single .po file"""
 
-    def __init__(self, opened):
+    def __init__(self, opened=None, filename=None):
+        if opened is None:
+            with open(filename, "rb") as ouropened:
+                return self.__init__(ouropened)
         self.entries = []
         callbackentries(
             opened, lambda x: self.entries.append(self.parse_entry(x)))
@@ -54,7 +60,16 @@ class Catalog(object):
         for i in popthem:
             self.meta = self.entries.pop(i)
 
-    def rawzapisdopliku(self, opened):
+    def rawsave(self, opened=None, filename=None,
+                truncate=False, truncateonfilename=True):
+        """rawsave writes a Catalog into a file, taking raw lines from the
+        original just reordered"""
+        if opened is None:
+            with open(filename, "w") as ouropened:
+                return self.rawsave(ouropened,
+                                    truncate=truncate or truncateonfilename)
+        if truncate:
+            opened.truncate()
         self.meta.rawwrite(opened)
         for entry in self.entries:
             entry.rawwrite(opened)
@@ -148,7 +163,8 @@ class Catalog(object):
             else:
                 raise UnknownToken(l)
         if listfound:
-            return Plural(lines, msgid, msgid_plural, msgstrlist, comments, msgctxt=msgctxt)
+            return Plural(lines, msgid, msgid_plural,
+                          msgstrlist, comments, msgctxt=msgctxt)
         elif msgid is False:
             return SomeLines(lines, comments)
         elif len(msgid) == 0:
@@ -158,7 +174,8 @@ class Catalog(object):
 
 
 class SomeLines(object):
-    """SomeLines represents some lines from between two empty lines, not necessarily an Entry"""
+    """SomeLines represents some lines from between two empty lines, not
+    necessarily an Entry"""
 
     def __init__(self, listoflines, comments):
         self.listoflines = listoflines
@@ -199,7 +216,8 @@ class SomeLines(object):
 
 
 class Entry(SomeLines):
-    """Entry represents an entry (with msgid and msgstr), inheritts from SomeLines"""
+    """Entry represents an entry (with msgid and msgstr), inheritts from
+    SomeLines"""
 
     def __init__(self, listoflines, msgid, msgstr, comments, msgctxt=None):
         self.msgid = msgid
@@ -207,7 +225,7 @@ class Entry(SomeLines):
         for l in listoflines:
             if not l.strip():
                 raise EmptyLine
-        SomeLines.__init__(self, listoflines, comments)
+        super().__init__(self, listoflines, comments)
 
     def sortingname(self):
         print(self.msgid)
@@ -219,17 +237,19 @@ class Entry(SomeLines):
 
 class Plural(Entry):
 
-    def __init__(self, listoflines, msgid, msgid_plural, msgstrlist, comments, msgctxt=None):
+    def __init__(self, listoflines, msgid, msgid_plural,
+                 msgstrlist, comments, msgctxt=None):
         self.msgid_plural = msgid_plural
-        Entry.__init__(self, listoflines, msgid, msgstrlist,
-                       comments, msgctxt=msgctxt)
+        super().__init__(self, listoflines, msgid, msgstrlist,
+                         comments, msgctxt=msgctxt)
 
 
 class Meta(Entry):
     """Meta is an Entry eith msgid \"\", which has metadata in comments"""
 
     def __init__(self, listoflines, msgstr, comments, msgctxt=None):
-        Entry.__init__(self, listoflines, "", msgstr, comments, msgctxt=msgctxt)
+        super().__init__(self, listoflines, "",
+                         msgstr, comments, msgctxt=msgctxt)
 
 
 class Comment(object):
