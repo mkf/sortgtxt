@@ -239,7 +239,6 @@ class SomeLines(object):
     def sortingname(self):
         if self.cmsgid is not None:
             return self.cmsgid
-        print(self.comments[0].line)
         return self.comments[0].line
 
 
@@ -256,7 +255,6 @@ class Entry(SomeLines):
         SomeLines.__init__(self, listoflines, comments)
 
     def sortingname(self):
-        print(self.msgid)
         return self.msgid
 
     def getourid(self):
