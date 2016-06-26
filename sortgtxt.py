@@ -48,7 +48,7 @@ class Catalog(object):
 
     def __init__(self, opened=None, filename=None):
         if opened is None:
-            with open(filename, "rb") as ouropened:
+            with open(filename, "r") as ouropened:
                 return self.__init__(ouropened)
         self.entries = []
         callbackentries(
