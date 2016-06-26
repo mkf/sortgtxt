@@ -47,6 +47,8 @@ class Catalog(object):
     """Catalog represents a single .po file"""
 
     def __init__(self, opened=None, filename=None):
+        """Use opened for opened file objects, like open(fname,"r"), or use
+        filename and it will call __init__ again with open(filename,"r")."""
         if opened is None:
             with open(filename, "r") as ouropened:
                 return Catalog.__init__(self, opened=ouropened)
@@ -75,18 +77,23 @@ class Catalog(object):
             entry.rawwrite(opened)
 
     def sortbymsgid(self):
+        """self.entries = sorted(self.entries, key=lambda x: x.sortingname())"""
         self.entries = sorted(self.entries, key=lambda x: x.sortingname())
 
     @staticmethod
     def getquot(line):
+        """Get what is inside the quotes"""
         return denormalize(quot.findall(line)[0])
 
     @staticmethod
     def msgstrdigit(line):
+        """Get the digit from plural msgstr list"""
         return msgstrbracke.findall(line)[0]
 
     @staticmethod
     def startswithhash(l):
+        """Return instance of some comment class with line as the argument,
+        by detecting the type of comment basing on the '«#» & sth' beginning"""
         if l.startswith("# "):
             return TransComment(l)
         elif l.startswith("#."):
@@ -175,7 +182,9 @@ class Catalog(object):
 
 class POFileSorter(Catalog):
     """Just some shortcuts of Catalog usage.
-    Personally I do not recommend using them."""
+    Personally I do not recommend using them. Before using POFileSorter, read
+    the docstrings of all of it's methods, or even the code itself (it's pretty
+    short, just a few lines)."""
 
     def __init__(self, filename):
         self.filename = filename
@@ -183,6 +192,8 @@ class POFileSorter(Catalog):
 
     @staticmethod
     def _defaultbackupfname():
+        """Generates 'django_backups_%Y%d%m%H%M%S.po' string in local
+        timezone"""
         from datetime import datetime
         return ''.join([
             "django_backups_",
@@ -192,8 +203,12 @@ class POFileSorter(Catalog):
 
     def sort_and_save(
             self, output_filename="foo.po",
-            backup=True,
+            backup=False,
             backup_filename=lambda: POFileSorter._defaultbackupfname()):
+        """Sorts the entries with self.sortbymsgid(), then saves with
+        self.rawsave to output_filename. Before saving, if backup is True, saves
+        the backup to backup_filename(). Yes, backup_filename has to be
+        callable. Screwed up, isn't it?"""
         if backup:
             from shutil import copyfile
             copyfile(self.filename, backup_filename())

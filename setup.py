@@ -11,7 +11,7 @@ with open(path.join(here, "README.md"), encoding='utf-8') as f:
 
 setup(
     name="sortgtxt",
-    version='0.0.6',
+    version='0.0.7',
     description="Module for sorting Gettext files",
     url='https://github.com/ArchieT/sortgtxt',
     author="Michał Krzysztof Feiler",
