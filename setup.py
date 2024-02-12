@@ -13,9 +13,9 @@ setup(
     name="sortgtxt",
     version='0.0.7',
     description="Module for sorting Gettext files",
-    url='https://github.com/ArchieT/sortgtxt',
-    author="Michał Krzysztof Feiler",
-    author_email="archiet@platinum.edu.pl",
+    url='https://github.com/mkf/sortgtxt',
+    author="Mika Feiler",
+    author_email="m@mikf.pl",
     classifiers=[
             'Programming Language :: Python :: 2',
             'Programming Language :: Python :: 2.6',
